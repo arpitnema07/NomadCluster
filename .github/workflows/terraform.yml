@@ -39,14 +39,14 @@ jobs:
         run: terraform validate
         working-directory: ./terraform
 
-      - name: Terraform Plan
-        id: plan
-        run: terraform plan -var "key_name=${{ secrets.SSH_KEY_NAME }}" -out=tfplan
-        working-directory: ./terraform
-
       - name: Terraform Destroy (before re-creation)
         id: destroy_before_create
         run: terraform destroy -auto-approve -var "key_name=${{ secrets.SSH_KEY_NAME }}" || true # Allow destroy to fail if no resources exist
+        working-directory: ./terraform
+
+      - name: Terraform Plan
+        id: plan
+        run: terraform plan -var "key_name=${{ secrets.SSH_KEY_NAME }}" -out=tfplan
         working-directory: ./terraform
 
       - name: Terraform Apply
