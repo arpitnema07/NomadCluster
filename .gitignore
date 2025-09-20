@@ -16,3 +16,4 @@ terraform.rc
 
 # Logs
 *.log
+info.txt

@@ -1,0 +1,73 @@
+name: Terraform CI/CD for Nomad Cluster
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch: # Allows manual triggering
+
+env:
+  AWS_REGION: us-east-1 # Or your desired AWS region
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.7.6 # Specify a compatible Terraform version
+
+      - name: Terraform Init
+        id: init
+        run: terraform init
+        working-directory: ./terraform
+
+      - name: Terraform Validate
+        id: validate
+        run: terraform validate
+        working-directory: ./terraform
+
+      - name: Terraform Plan
+        id: plan
+        run: terraform plan -var "key_name=${{ secrets.SSH_KEY_NAME }}" -out=tfplan
+        working-directory: ./terraform
+
+      - name: Terraform Apply
+        id: apply
+        run: terraform apply -auto-approve tfplan
+        working-directory: ./terraform
+
+      - name: Get Nomad Server Public IP
+        id: get_server_ip
+        run: |
+          NOMAD_SERVER_IP=$(terraform output -raw nomad_server_public_ips | jq -r '.[0]')
+          echo "NOMAD_SERVER_IP=$NOMAD_SERVER_IP" >> $GITHUB_ENV
+        working-directory: ./terraform
+
+      - name: Setup SSH Agent
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Deploy Nomad Job
+        run: |
+          # Ensure Nomad is ready (add a sleep or health check if needed)
+          sleep 60 # Give Nomad some time to start on the EC2 instance
+
+          # Copy hello-world.nomad to the server
+          scp -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ./terraform/jobs/hello-world.nomad ubuntu@${{ env.NOMAD_SERVER_IP }}:/home/ubuntu/jobs/hello-world.nomad
+
+          # SSH into Nomad server and run the job
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ubuntu@${{ env.NOMAD_SERVER_IP }} "mkdir -p /home/ubuntu/jobs && nomad job run /home/ubuntu/jobs/hello-world.nomad"

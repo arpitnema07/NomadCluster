@@ -93,11 +93,39 @@ The "hello-world" application is deployed on port `80` of the Nomad client(s).
     ```
 2.  Open your web browser and navigate to: `http://<client-public-ip>`
 
+## CI/CD with GitHub Actions
+
+This project includes a GitHub Actions workflow (`.github/workflows/terraform.yml`) to automate the deployment of the Nomad cluster and the "hello-world" application.
+
+### Setup GitHub Secrets
+
+For the CI/CD pipeline to work, you need to configure the following secrets in your GitHub repository:
+
+1.  **AWS_ACCESS_KEY_ID**: Your AWS Access Key ID.
+2.  **AWS_SECRET_ACCESS_KEY**: Your AWS Secret Access Key.
+3.  **SSH_KEY_NAME**: The name of your AWS EC2 Key Pair (e.g., `nomad-key`).
+4.  **SSH_PRIVATE_KEY**: The *content* of your SSH private key (`.pem` file). When adding this secret, paste the entire content of your `.pem` file, including `-----BEGIN RSA PRIVATE KEY-----` and `-----END RSA PRIVATE KEY-----` lines.
+
+**Steps to add secrets:**
+-   Go to your GitHub repository.
+-   Click on "Settings" > "Secrets and variables" > "Actions".
+-   Click "New repository secret" for each secret listed above.
+
+### Triggering the Pipeline
+
+The pipeline is configured to run automatically on `push` to the `main` branch. You can also manually trigger it:
+
+1.  Go to your GitHub repository.
+2.  Click on "Actions".
+3.  Select the "Terraform CI/CD for Nomad Cluster" workflow from the left sidebar.
+4.  Click "Run workflow" on the right side.
+
 ## Cleanup
 
 To destroy all the resources created by Terraform:
 
 ```bash
+cd terraform
 terraform destroy -var "key_name=nomad-key"
 ```
 Type `yes` when prompted to confirm the destruction.
