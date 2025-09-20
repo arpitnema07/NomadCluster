@@ -63,7 +63,7 @@ The architecture consists of:
     ```
     Inside the server, submit the Nomad job:
     ```bash
-    nomad job run /home/ubuntu/hello-world.nomad
+    nomad job run /home/ubuntu/jobs/hello-world.nomad
     ```
     *Note: The `hello-world.nomad` file is not automatically copied to the server by Terraform in this setup. You would typically use a provisioner or a configuration management tool for this. For this exercise, you can manually copy it or create it on the server.*
     To simplify, we will assume the `hello-world.nomad` is available on the server.

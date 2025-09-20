@@ -97,7 +97,7 @@ resource "aws_instance" "nomad_server" {
   vpc_security_group_ids = [aws_security_group.nomad_sg.id]
   associate_public_ip_address = true
 
-  user_data = templatefile("${path.module}/user_data.sh", {
+  user_data = templatefile("${path.module}/scripts/user_data.sh", {
     USER_DATA_INSTANCE_TYPE = "server",
     NOMAD_SERVER_IP         = "" # Not used for servers
   })
@@ -116,7 +116,7 @@ resource "aws_instance" "nomad_client" {
   vpc_security_group_ids = [aws_security_group.nomad_sg.id]
   associate_public_ip_address = true
 
-  user_data = templatefile("${path.module}/user_data.sh", {
+  user_data = templatefile("${path.module}/scripts/user_data.sh", {
     USER_DATA_INSTANCE_TYPE = "client",
     NOMAD_SERVER_IP         = aws_instance.nomad_server[0].private_ip # Assuming a single server for simplicity
   })
