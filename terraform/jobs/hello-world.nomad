@@ -17,7 +17,7 @@ job "hello-world" {
         image = "hashicorp/http-echo"
         args = [
           "-listen", ":80",
-          "-text", "Hello from Nomad on AWS!"
+          "-text", "Hello from Nomad on AWS, Now with Working CI/CD !"
         ]
         ports = ["http"]
       }
