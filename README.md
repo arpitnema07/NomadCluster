@@ -113,7 +113,7 @@ For the CI/CD pipeline to work, you need to configure the following secrets in y
 
 ### Triggering the Pipeline
 
-The pipeline is configured to run automatically on `push` to the `main` branch. You can also manually trigger it:
+The pipeline is configured to run automatically on `push` to the `main` branch. **Note that each run of the pipeline will first destroy any existing infrastructure managed by this Terraform configuration and then create new resources.** You can also manually trigger it:
 
 1.  Go to your GitHub repository.
 2.  Click on "Actions".

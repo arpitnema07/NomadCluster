@@ -44,6 +44,11 @@ jobs:
         run: terraform plan -var "key_name=${{ secrets.SSH_KEY_NAME }}" -out=tfplan
         working-directory: ./terraform
 
+      - name: Terraform Destroy (before re-creation)
+        id: destroy_before_create
+        run: terraform destroy -auto-approve || true # Allow destroy to fail if no resources exist
+        working-directory: ./terraform
+
       - name: Terraform Apply
         id: apply
         run: terraform apply -auto-approve tfplan
@@ -66,8 +71,11 @@ jobs:
           # Ensure Nomad is ready (add a sleep or health check if needed)
           sleep 60 # Give Nomad some time to start on the EC2 instance
 
+          # Create jobs directory on the Nomad server
+          ssh -o StrictHostKeyChecking=no ubuntu@${{ env.NOMAD_SERVER_IP }} "mkdir -p /home/ubuntu/jobs"
+
           # Copy hello-world.nomad to the server
-          scp -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ./terraform/jobs/hello-world.nomad ubuntu@${{ env.NOMAD_SERVER_IP }}:/home/ubuntu/jobs/hello-world.nomad
+          scp -o StrictHostKeyChecking=no ./terraform/jobs/hello-world.nomad ubuntu@${{ env.NOMAD_SERVER_IP }}:/home/ubuntu/jobs/hello-world.nomad
 
           # SSH into Nomad server and run the job
-          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ubuntu@${{ env.NOMAD_SERVER_IP }} "mkdir -p /home/ubuntu/jobs && nomad job run /home/ubuntu/jobs/hello-world.nomad"
+          ssh -o StrictHostKeyChecking=no ubuntu@${{ env.NOMAD_SERVER_IP }} "nomad job run /home/ubuntu/jobs/hello-world.nomad"
