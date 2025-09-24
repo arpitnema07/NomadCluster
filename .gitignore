@@ -17,3 +17,5 @@ terraform.rc
 # Logs
 *.log
 info.txt
+RESOURCE_EXPLANATION.md
+USE_CASE_LIFECYCLE.md

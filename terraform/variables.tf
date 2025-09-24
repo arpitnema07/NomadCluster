@@ -38,3 +38,15 @@ variable "nomad_client_count" {
   type        = number
   default     = 1
 }
+
+variable "tf_state_bucket_name" {
+  description = "Name of the S3 bucket for Terraform state storage"
+  type        = string
+  default     = "nomad-terraform-state-bucket"
+}
+
+variable "tf_state_dynamodb_table_name" {
+  description = "Name of the DynamoDB table for Terraform state locking"
+  type        = string
+  default     = "nomad-terraform-state-locks"
+}

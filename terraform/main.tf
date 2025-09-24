@@ -1,5 +1,51 @@
+terraform {
+  backend "s3" {
+    bucket         = var.tf_state_bucket_name
+    key            = "nomad/terraform.tfstate"
+    region         = var.aws_region
+    dynamodb_table = var.tf_state_dynamodb_table_name
+  }
+}
+
 provider "aws" {
   region = var.aws_region
+}
+
+resource "aws_s3_bucket" "terraform_state" {
+  bucket = var.tf_state_bucket_name
+  acl    = "private" # Recommended for state files
+
+  versioning {
+    enabled = true # Recommended for state files
+  }
+
+  server_side_encryption configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm = "AES256"
+      }
+    }
+  }
+
+  tags = {
+    Name = "terraform-state-bucket"
+  }
+}
+
+resource "aws_dynamodb_table" "terraform_locks" {
+  name         = var.tf_state_dynamodb_table_name
+  billing_mode = "PAY_PER_REQUEST" # Cost-effective for low usage
+
+  attribute {
+    name = "LockID"
+    type = "S"
+  }
+
+  hash_key = "LockID"
+
+  tags = {
+    Name = "terraform-state-lock-table"
+  }
 }
 
 resource "aws_vpc" "nomad_vpc" {
