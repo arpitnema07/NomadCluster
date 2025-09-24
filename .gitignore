@@ -19,3 +19,6 @@ terraform.rc
 info.txt
 RESOURCE_EXPLANATION.md
 USE_CASE_LIFECYCLE.md
+tts.py
+whisper.py
+speech.wav
